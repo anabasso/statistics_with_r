@@ -32,16 +32,20 @@ load("brfss2013.RData")
 
 ## Part 1: Data
 
+INTRO: where this data came from
+What does it analyse
+What was the methodology for sampling the data: can it be generalized?
+Can it infer causality? 
 
 * * *
 
 ## Part 2: Research questions
 
-**Research quesion 1:**
+**Research question 1:**
 
-**Research quesion 2:**
+**Research question 2:**
 
-**Research quesion 3:**
+**Research question 3:**
 
 
 * * *
@@ -52,7 +56,7 @@ NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk"
 button (green button with orange arrow) above. Make sure that your code is visible
 in the project you submit. Delete this note when before you submit your work.
 
-**Research quesion 1:**
+**Research question 1:**
 
 ```{r}
 
@@ -60,7 +64,7 @@ in the project you submit. Delete this note when before you submit your work.
 
 
 
-**Research quesion 2:**
+**Research question 2:**
 
 ```{r}
 
@@ -68,7 +72,7 @@ in the project you submit. Delete this note when before you submit your work.
 
 
 
-**Research quesion 3:**
+**Research question 3:**
 
 ```{r}
 
