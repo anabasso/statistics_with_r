@@ -18,10 +18,6 @@ library(dplyr)
 
 ### Load data
 
-Make sure your data and R Markdown files are in the same directory. When loaded
-your data file will be called `brfss2013`. Delete this note when before you submit 
-your work. 
-
 ```{r load-data}
 load("brfss2013.RData")
 ```
@@ -32,10 +28,27 @@ load("brfss2013.RData")
 
 ## Part 1: Data
 
-INTRO: where this data came from
-What does it analyse
-What was the methodology for sampling the data: can it be generalized?
-Can it infer causality? 
+The dataset used for this analysis is the Behavioral Risk Factor Surveillance System (BRFSS), an ongoing surveillance system designed to measure behavioral risk factors for the non-institutionalized adult population (18 years of age and older) residing in the US.
+
+### What does this dataset contain?
+
+The dataset contains uniform, state-specific **data on preventive health practices and risk behaviors that are linked to chronic diseases, injuries, and preventable infectious diseases** that affect the adult population. 
+
+Factors assessed by the BRFSS in 2013 include tobacco use, HIV/AIDS knowledge and prevention, exercise, immunization, health status, healthy days — health-related quality of life, health care access, inadequate sleep, hypertension awareness, cholesterol awareness, chronic health conditions, alcohol consumption, fruits and vegetables consumption, arthritis burden, and seatbelt use. 
+
+### Data Collection: what was the methodology used?
+
+Since 2011, BRFSS conducts **telephone-based surveys** (both landline and cellular). In conducting the BRFSS landline telephone survey, interviewers collect data from a randomly selected adult in a household. In conducting the cellular telephone version of the BRFSS questionnaire, interviewers collect data from an adult who participates by using a cellular telephone and resides in a private residence or college housing.
+
+Cell phones were added to the survey  to maintain representativeness, coverage, and validity, since research shows that people who have only cellular phone service have a different demographic profile than those persons who have landline telephones. They tend to be younger, rent instead of own a home, are predominately Hispanic, and tend to be unmarried. There are attitudinal and behavioral differences between the two groups as well.
+
+From 1980 until 2011 CDC used a statistical method called post stratification to weight BRFSS survey data to simultaneously adjust survey respondent data to known proportions of age, race and ethnicity, gender, geographic region, or other known characteristics of a population. Since 2011, CDC adopted a more sophisticated weighting method called **iterative proportional fitting, or raking***.  Weighting makes the sample more representative of the population and adjusts for nonresponse bias.
+
+Questionnaires are also performed in both **English and Spanish** in order to address spanish-speaker respondents as well. 
+
+**The population of study (non-institutionalized adult population residing in the US) is well represented by this methodology and therefore associations among variables can be generalized to the population. This is an observational study, so the analysis cannot imply causation (only association).**
+
+
 
 * * *
 
