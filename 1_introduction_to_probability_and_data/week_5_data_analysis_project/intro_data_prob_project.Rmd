@@ -42,7 +42,7 @@ Since 2011, BRFSS conducts **telephone-based surveys** (both landline and cellul
 
 Cell phones were added to the survey  to maintain representativeness, coverage, and validity, since research shows that people who have only cellular phone service have a different demographic profile than those persons who have landline telephones. They tend to be younger, rent instead of own a home, are predominately Hispanic, and tend to be unmarried. There are attitudinal and behavioral differences between the two groups as well.
 
-From 1980 until 2011 CDC used a statistical method called post stratification to weight BRFSS survey data to simultaneously adjust survey respondent data to known proportions of age, race and ethnicity, gender, geographic region, or other known characteristics of a population. Since 2011, CDC adopted a more sophisticated weighting method called **iterative proportional fitting, or raking***.  Weighting makes the sample more representative of the population and adjusts for nonresponse bias.
+From 1980 until 2011 CDC used a statistical method called post stratification to weight BRFSS survey data to simultaneously adjust survey respondent data to known proportions of age, race and ethnicity, gender, geographic region, or other known characteristics of a population. Since 2011, CDC adopted a more sophisticated weighting method called **iterative proportional fitting, or raking**.  Weighting makes the sample more representative of the population and adjusts for nonresponse bias.
 
 Questionnaires are also performed in both **English and Spanish** in order to address spanish-speaker respondents as well. 
 
