@@ -46,7 +46,7 @@ From 1980 until 2011 CDC used a statistical method called post stratification to
 
 Questionnaires are also performed in both **English and Spanish** in order to address spanish-speaker respondents as well. 
 
-**The population of study (non-institutionalized adult population residing in the US) is well represented by this methodology and therefore associations among variables can be generalized to the population. This is an observational study, so the analysis cannot imply causation (only association).**
+**The population of study (non-institutionalized adult population residing in the US) is well represented by this methodology. This is an observational study that uses random sampling, therefore associations among variables can be generalized to the population. The study is not an experiment and doesn’t use random assignment, so the analysis cannot imply causation (only association).**
 
 
 
