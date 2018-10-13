@@ -11,9 +11,10 @@ output:
 
 ### Load packages
 
-```{r load-packages, message = FALSE}
+```{r load-packages, message = FALSE, warning = F}
 library(ggplot2)
 library(dplyr)
+library(ggmosaic)
 ```
 
 ### Load data
@@ -48,34 +49,123 @@ Questionnaires are also performed in both **English and Spanish** in order to ad
 
 **The population of study (non-institutionalized adult population residing in the US) is well represented by this methodology. This is an observational study that uses random sampling, therefore associations among variables can be generalized to the population. The study is not an experiment and doesn’t use random assignment, so the analysis cannot imply causation (only association).**
 
-
-
 * * *
 
 ## Part 2: Research questions
 
-**Research question 1:**
+### Research question 1:
 
-**Research question 2:**
+Some people sarcastically say weight is not a problem if you have unlimited time and money. **Is there really a relationship between income and weight? And is this association the same for males or females?**
 
-**Research question 3:**
+Growing rates of obesity is of great concern when it comes to health policies. It is important to identify what are the most affected segments of the population in order to create policies to prevent it.
+
+### Research question 2:
+
+
+
+### Research question 3:
 
 
 * * *
 
 ## Part 3: Exploratory data analysis
 
-NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
-button (green button with orange arrow) above. Make sure that your code is visible
-in the project you submit. Delete this note when before you submit your work.
+### Research question 1:
 
-**Research question 1:**
+**What is the relationship between income and weight? Is this association the same for males or females?**
 
-```{r}
+In order to tackle this question we start by selecting the categories we are going to use:
 
+* X_bmi5 (Computed Body Mass Index)
+* X_bmi5cat (Computed Body Mass Index Categories),
+* X_incomg (Computed Income Categories),
+* sex (Respondents Sex)
+
+```{r q1 prep}
+weight <- brfss2013 %>% 
+  select(X_bmi5,
+         X_bmi5cat,
+         X_incomg,
+         sex)
+```
+
+#### Summary statistics
+
+```{r bmi summary}
+hist(weight$X_bmi5,
+     col = 'peachpuff',
+     border = 'black', 
+     prob = TRUE,
+     xlab = 'Body Mass Index with 2 implied decimal places',
+     main = 'Histogram of Body Mass Index')
+lines(density(weight$X_bmi5, na.rm = T), # density plot
+      lwd = 2,
+      col = 'chocolate3')
+abline(v = mean(weight$X_bmi5, na.rm = T), # mean
+       col = 'royalblue',
+       lwd = 2)
+abline(v = median(weight$X_bmi5, na.rm = T), # median
+       col = 'red',
+       lwd = 2)
+legend(x = 'topright', # legend
+       c('Density plot', 'Mean', 'Median'),
+       col = c('chocolate3', 'royalblue', 'red'),
+       lwd = c(2, 2, 2))
+```
+
+**Body Mass Index** has a mean of `r round(mean(weight$X_bmi5, na.rm = T))` and a right-skewed distribution with a few outliers especially towards the higher end. The median is `r median(weight$X_bmi5, na.rm = T)` and the interquartile range is `r IQR(weight$X_bmi5, na.rm = T)`. There are `r sum(is.na(weight$X_bmi5))` missing values.
+
+In a closer look, **outliers on the higher end seem consistent**. All values over 8000 are correctly classified as "obese" in the BMI Category variable.
+
+On the lower end, however, we can see there are some **very unplausible values near 0**. Inspecting all values under 1000 we can see 6 records with BMI values under 10, indicating a mistake in the records The labels for the BMI category appear to have no relation to the BMI. In order to avoid working with unreliable data, in this case we are going to exclude those records from the dataset.
+
+```{r outliers ower end}
+weight[which(weight$X_bmi5 < 1000),] # errors
+weight <- weight[-which(weight$X_bmi5 < 1000),] #eliminate errors
 ```
 
 
+Following to that, we can now take a look at the distribution of the other variables of relevance for this question: **Income** and **Sex**.
+
+
+```{r sex income summary, warning = F}
+weight %>%
+  group_by(X_incomg) %>% 
+  summarise(total = n()) %>% 
+  mutate(percentage = round(total / nrow(weight) * 100, 1))
+
+weight %>%
+  group_by(sex) %>% 
+  summarise(total = n()) %>% 
+  mutate(percentage = round(total / nrow(weight) * 100, 1))
+```
+
+#### Analysis
+
+```{r marimekko plot}
+# Plot preparation
+weight <- weight %>% 
+  filter(!is.na(X_bmi5cat),
+         !is.na(X_incomg),
+         !is.na(sex))
+
+# Analysis plot
+ggplot(data = weight) +
+  geom_mosaic(aes(x = product(X_bmi5cat, X_incomg), fill=X_bmi5cat)) +
+  labs(x = 'Income Categories',
+       y = 'Body Mass Index Categories') +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(~sex)
+```
+
+There seem to be an association between weight and BMI that is dependent on sex.
+In both cases, **the proportion of Underweight individuals decreases as the income increases**. This relationship is more accentuaded for males.
+
+As the income increases, the proportion of **male** Obese and Normal weight individuals also seem to decrease, and the proportion of Overweight indiduals increases.
+
+For **females**, as the income increases, the proportion of Obese individuals decreases and the proportion of Normal weight individuals increases.
+
+**The very marked patterns identified in the plots suggests there is a strong relationship between income and weight and since the patterns are very different for each sex, we can say this relationship is also dependent on gender.**
 
 **Research question 2:**
 
