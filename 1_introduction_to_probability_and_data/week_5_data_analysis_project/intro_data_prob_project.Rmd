@@ -172,7 +172,7 @@ For **females**, as the income increases, the proportion of Obese individuals de
 
 **The very marked patterns identified in the plots suggests there is a strong relationship between income and weight and since the patterns are very different for each sex, we can say this relationship is also dependent on gender.**
 
-##Research question 2:
+### Research question 2:
 
 **Is there a correlation between exercise and the risk of a heart attack? Could this be confounded by age?**
 
@@ -189,7 +189,7 @@ heart <- brfss2013 %>%
          X_age_g)
 ```
 
-### Summary Statistics
+#### Summary Statistics
 
 ```{r, message = FALSE, warning = F}
 grid.arrange(
@@ -230,7 +230,7 @@ heart <- heart %>%
          !is.na(X_age_g))
 ```
 
-### Analysis
+#### Analysis
 ```{r}
 heart %>% 
   ggplot() +
