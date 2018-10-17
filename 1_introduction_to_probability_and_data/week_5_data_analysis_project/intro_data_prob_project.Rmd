@@ -308,7 +308,7 @@ legend(x = 'topright', # legend
        lwd = c(2, 2))
 ```
 
-The number of sleep hours per day is a unimodal distribution where mean, median and mode coincide at 7 hours. The distribution is slightly non-symmetrical and cannot be described by the normal curve. The IQR is `r IQR(sleep$sleptim1, na.rm = T)` and the standard deviation is `r round(sd(sleep$sleptim1, na.rm = T), 2)`.
+The number of sleep hours per day is a unimodal distribution where mean, median and mode coincide at 7 hours. The distribution is right-skewed and cannot be described by the normal curve (represented with a blue line in the figure above). The IQR is `r IQR(sleep$sleptim1, na.rm = T)` and the standard deviation is `r round(sd(sleep$sleptim1, na.rm = T), 2)`.
 
 We can also see that approximatelly 10% of the respondents say they have 'serious difficulty concentrating, remembering, or making decisions'.
 
