@@ -15,6 +15,7 @@ output:
 library(ggplot2)
 library(dplyr)
 library(ggmosaic)
+library(gridExtra)
 ```
 
 ### Load data
@@ -59,7 +60,9 @@ Growing rates of obesity is of great concern when it comes to health policies. I
 
 ### Research question 2:
 
+**Is there a correlation between exercise and the risk of a heart attack? Could this be confounded by age?**
 
+One of the most common preventive treatments for a heart attack is to exercise more. But do more people who were ever diagnosed with a heart attack exercise, in comparison with people that never were diagnosed? What role does age play in this correlation?
 
 ### Research question 3:
 
@@ -151,7 +154,7 @@ weight <- weight %>%
 
 # Analysis plot
 ggplot(data = weight) +
-  geom_mosaic(aes(x = product(X_bmi5cat, X_incomg), fill=X_bmi5cat)) +
+  geom_mosaic(aes(x = product(X_bmi5cat, X_incomg), fill = X_bmi5cat)) +
   labs(x = 'Income Categories',
        y = 'Body Mass Index Categories',
        title = 'Body Mass Index per Income for Males and Females',
@@ -169,17 +172,92 @@ For **females**, as the income increases, the proportion of Obese individuals de
 
 **The very marked patterns identified in the plots suggests there is a strong relationship between income and weight and since the patterns are very different for each sex, we can say this relationship is also dependent on gender.**
 
-**Research question 2:**
+##Research question 2:
+
+**Is there a correlation between exercise and the risk of a heart attack? Could this be confounded by age?**
+
+In order to tackle this question we start by selecting the categories we are going to use:
+
+* exerany2 (exercise in past 30 days),
+* cvdinfr4 (ever diagnosed with heart attack),
+* X_age_g (imputed age in six groups)
 
 ```{r}
-
+heart <- brfss2013 %>% 
+  select(exerany2,
+         cvdinfr4,
+         X_age_g)
 ```
 
+### Summary Statistics
 
+```{r, message = FALSE, warning = F}
+grid.arrange(
+  ggplot(heart, aes(x = exerany2)) +
+    geom_bar(aes(y = (..count..)/sum(..count..))) +
+    scale_x_discrete(limits = rev(levels(heart$exerany2))) +
+    coord_flip() +
+    labs(x = '',
+         y = '',
+         title = 'Exercise In Past 30 Days (%)'),
+  ggplot(heart, aes(x = cvdinfr4)) +
+    geom_bar(aes(y = (..count..)/sum(..count..))) +
+    scale_x_discrete(limits = rev(levels(heart$cvdinfr4))) +
+    coord_flip() +
+    labs(x = '',
+         y = '',
+         title = 'Ever Diagnosed w/ Heart Attack (%)'),
+  ggplot(heart, aes(x = X_age_g)) +
+    geom_bar(aes(y = (..count..)/sum(..count..))) +
+    scale_x_discrete(limits = rev(levels(heart$X_age_g))) +
+    coord_flip() +
+    labs(x = '',
+         y = '',
+         title = 'Imputed Age In Six Groups (%)'),
+  layout_matrix = rbind(c(1,2),
+                        c(3,3)))
+```
 
-**Research question 3:**
+In a first exploration of the data we can see that **more than 70% of the respondents exercised in the last 30 days**, and that **the majority of the respondents was never diagnosed with heart attack**. We can also see that **the number of respondents increases for each age group**, with fewer respondents that are younger and more respondents that are older.
+
+There are `r sum(is.na(heart$X_age_g))` missing values for Age, `r sum(is.na(heart$exerany2))` missing values for Exercise  and `r sum(is.na(heart$cvdinfr4))` missing values for heart attack. The total number of records with missing values in any of the three variables is `r heart %>% filter(is.na(exerany2) | is.na(cvdinfr4) | is.na(X_age_g)) %>% count()`, corresponding to `r round((heart %>% filter(is.na(exerany2) | is.na(cvdinfr4) | is.na(X_age_g)) %>% count()) / nrow(heart),3) * 100`% of the dataset. Removing those missing values will allow us to plot the categorical variables without a significative loss of information.
 
 ```{r}
-
+# Removing missing values
+heart <- heart %>% 
+  filter(!is.na(exerany2),
+         !is.na(cvdinfr4),
+         !is.na(X_age_g))
 ```
 
+### Analysis
+```{r}
+heart %>% 
+  ggplot() +
+  geom_mosaic(aes(x = product(cvdinfr4, exerany2), fill = cvdinfr4)) +
+  labs(x = 'Exercise In Past 30 Days',
+       y = 'Ever Diagnosed With Heart Attack',
+       title = 'Exercise per Heart Attack',
+       fill = 'Heart Attack') +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+When plotting Heart Attack with Excercise we can see there is an inverse correlation: **people who have had a heart attack tend to exercise less**. We might wonder about the direction of this correlation: would excercising prevents heart attacks or, on the contrarty, would having been diagnosed with a heart attack cause people to avoid excercising? Another interesting question in this case might be: could those two variables be affected by a confounding factor, such as age?
+
+```{r}
+heart %>% 
+  ggplot() +
+  geom_mosaic(aes(x = product(cvdinfr4, exerany2), fill = cvdinfr4)) +
+  labs(x = 'Exercise In Past 30 Days',
+       y = 'Ever Diagnosed With Heart Attack',
+       title = 'Exercise per Heart Attack per Age',
+       fill = 'Heart Attack') +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(~X_age_g)
+```
+
+When we add the variable Age to the analysis we can see that Age is a factor that influences both variables (excercise and heart attack). **As age increases, we can see the probability of heart attack also increases** (as indicated by the height of the coral bars). At the same time, **as age increases, people are less likelly to excercise** (as indicated by the width of the yes bars in each plot).
+
+We can also see that the association identified in the former plot (People who have had a heart attack tend to exercise less) is still perceived for all age groups.
+
+## Research question 3:
