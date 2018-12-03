@@ -33,10 +33,21 @@ gss %>%
 
 ## Part 1: Data
 
+The General Social Survey (GSS) monitors societal change and studies the growing complexity of American society. The target population of the GSS is adults (18+) living in households in the United States. 
+
+The GSS was first conducted in 1972. Until 1994, it was conducted annually (except for 1979, 1981, and 1992). Since 1994, the GSS has been conducted in even numbered years.
+
+The vast majority of GSS data is obtained in face-to-face interviews. Computer-assisted personal interviewing began in the 2002 GSS. Under some conditions when it has proved difficult to arrange an in-person interview with a sampled respondent, GSS interviews may be conducted by telephone. Households were selected based on a random selection process. For more information on sampling design, and completion/response rates, see Appendix A: Sampling Design & Weighting.
+
+**The population of study (adult population –18-year old or more– living in households in the US) is well represented by the methodology. This is an observational study that uses random sampling, therefore associations among variables can be generalized to the population. The study is not an experiment and doesn’t use random assignment, so the analysis cannot imply causation (only association).**
 
 * * *
 
 ## Part 2: Research question
+
+This research  aims to analyse american attitudes toward homosexuality: has the acceptance rate changed over the years? Additionally, the research will study the relationship between acceptance rate and 
+
+
 
 
 
