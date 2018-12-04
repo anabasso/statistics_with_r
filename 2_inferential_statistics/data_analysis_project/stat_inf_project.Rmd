@@ -15,16 +15,14 @@ output:
 library(ggplot2)
 library(dplyr)
 library(statsr)
+library(ggmosaic)
+library(tidyr)
 ```
 
 ### Load data
 
 ```{r load-data}
 load("gss.Rdata")
-
-gss %>% 
-  group_by(year) %>% 
-  summarise(n())
 ```
 
 
@@ -45,24 +43,187 @@ The vast majority of GSS data is obtained in face-to-face interviews. Computer-a
 
 ## Part 2: Research question
 
-This research  aims to analyse american attitudes toward homosexuality: has the acceptance rate changed over the years? Additionally, the research will study the relationship between acceptance rate and 
+This research aims to analyse american attitudes toward homosexuality: has the acceptance rate changed over the years among the adult population residing in the US? Additionally, the research will study the relationship between acceptance rate and the educational level of respondents and whether they accept sexual relations between adults of the same sex.
 
+The project analyses the proportion of answers to the question: “What is your opinion about sexual relations between two adults of the same sex?” that responded “Not Wrong At All”. Did this proportion changed from 1973 (when the question was first included in the General Social Survey) to 2012 (our last year of data)?
 
-
-
+We will also use the data from 2012 to understand if is there a correlation between the educational level of the respondents and their answer.
 
 * * *
 
 ## Part 3: Exploratory data analysis
 
-NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
-button (green button with orange arrow) above. Make sure that your code is visible
-in the project you submit. Delete this note when before you submit your work.
+**The first part of our research question is to understand if the Homosexuality Acceptance Rate is changing over the years.**
+
+We first create a new calculated variable, Acceptance Rate, that is the proportion of respondents that answered "Not Wrong At All" to the question "What is your opinion about sexual relations between two adults of the same sex?" (variable *homosex* in our data).
+
+```{r}
+acceptance_rate <- gss %>% 
+  group_by(year, homosex) %>% 
+  summarise(n = n()) %>% 
+  group_by(year) %>% 
+  mutate(rate = n / sum(n)) %>% 
+  filter(homosex == 'Not Wrong At All')
+
+head(acceptance_rate)
+```
+
+We also check the **quality** of our data: **do we have a calculated rate for every year?** The vector below shows the years the information is not available.
+
+```{r}
+# Years not in the data
+rep(1972:2012)[which(!rep(1972:2012) %in% acceptance_rate$year )]
+```
+
+* For the years 1979, 1981 and 1992: there were no GSS due to funding limitations.
+* The odd-number years from 1995 and higher are missing because, since 1994, the GSS has been conducted in even numbered years.
+
+Let's inspect the remaining years: 1972, 1975, 1978, 1983 and 1986. Why are they missing?
+
+```{r}
+gss %>% 
+  filter(year %in% c(1972, 1975, 1978, 1983, 1986)) %>% 
+  group_by(year, homosex) %>% 
+  summarise(n = n())
+```
+
+A closer inspection shows that during those years, there are missing values for all observations in this question. That means this question was not included in the study on those 5 years.
+
+Finally, we can see the evolution of the acceptance rate over time.
+
+```{r}
+ggplot(acceptance_rate, aes(x = year, y = rate)) +
+  geom_line() +
+  ggtitle('Homosexuality acceptance over time')
+```
+
+We can see the acceptance rate oscillated during those years, with a first valley on the end of the 1980’s decade and the year of 1990 and a second valley on the year 2004. Overall, we can see a positive trend, very accentuated from 2004 to 2012.
+
+**The second part of our research question is to understand if is there a relationship between educational level and the attitude towards homosexuality**. To analyse it, we will use the latest data available (year 2012) and the variables *homosex* and *degree*.
+
+In this case, we remove missing values from both variables.
+
+```{r}
+# Data preparation: filter year 2012, select only relevant variables and exclude missing values
+education <- gss %>% 
+  filter(year == 2012) %>% 
+  select(homosex, degree) %>% 
+  filter(!is.na(homosex),
+         !is.na(degree))
+
+summary(education)
+```
+
+Both variables are categorical, so we can use a mosaic plot to explore the relationship between them.
+
+```{r}
+# Analysis plot
+ggplot(data = education) +
+  geom_mosaic(aes(x = product(homosex, degree), fill = homosex)) +
+  labs(x = 'Highest degree',
+       y = 'Opinion about homosexuality',
+       title = 'Opinion about homosexuality per Educational Degree (2012)',
+       fill = '') +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+In the plot we can see a clear correlation between the two variables. The highest the degree, the less likely people are to answer homosexuality is “Always wrong”, and more likely to answer “Not wrong at all”. Intermediate values “Almost always wrong” and “Sometimes wrong” don’t show a relationship as direct as the more polarized answers.
+
+Can we say this analysis is statistically significant? That is what we are going to study with inference.
 
 * * *
 
 ## Part 4: Inference
 
-NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
-button (green button with orange arrow) above. Make sure that your code is visible
-in the project you submit. Delete this note when before you submit your work.
+For the first part of the analysis, we want to compare the proportion of people whose opinion towards homosexuality is “Not wrong at all” in the years 1973 and 2012. Our null hypothesis is that there is no difference in the proportion and all observed differences are due to sampling variability. The alternative hypothesis is that the proportion of acceptance rate has changed.
+
+For this, we prepare the data considering the answer “Not wrong at all” as a success and every other answer as a failure. Missing data (answered “Don’t Know” or didn’t answered) will also be considered as a failure.
+
+```{r}
+acceptance_rate_compare <- gss %>% 
+  select(year, homosex) %>% 
+  filter(year == 1973 |
+           year == 2012)
+
+acceptance_rate_compare$homosex2 <- ifelse(acceptance_rate_compare$homosex == 'Not Wrong At All', 
+                                           'Not Wrong At All', 'Other')
+acceptance_rate_compare$homosex2[which(is.na(acceptance_rate_compare$homosex2))] <- 'Other'
+```
+
+We will first check the conditions for inference: 
+
+```{r}
+acceptance_rate_compare %>% 
+  group_by(year, homosex2) %>% 
+  summarise(n())
+```
+
+* **1. Independence:** Data come from a random sample and, since sampled without replacement, the sample size is less than 10% of the population. The independence condition is met. 
+
+* **2. Distribution shape / skew:** Since the number of successes and failures are both larger than 10, the normal condition is also met.
+
+Having met the conditions, we will perform a **hypothesis test** for comparing **two proportions** using the **inference function** in R. Our response variable is *homosex2* and our explanatory variable is the *year* (1993 and 2012) and we use a **95% confidence level**.
+
+The method used is theoretical (using the T distribution). The null hypothesis is that the difference in the proportions in 2012 and 1973 is 0 (no change observed). The hypothesis test is **two-sided**, since we want to detect evidence that the acceptance rate has changed in the United States.
+
+```{r}
+inference(y = homosex2, 
+          x = as.factor(year), 
+          data = acceptance_rate_compare,
+          type = 'ht',
+          statistic = 'proportion',
+          success = 'Not Wrong At All',
+          method = 'theoretical',
+          alternative = 'twosided',
+          null = 0,
+          conf_level = 0.95)
+```
+
+Our p-value is very low (less than 0.0001), so we can say there is convincing evidence that the United States has seen a change in its acceptance rate towards homosexuality between 1973 and 2012.
+
+We can also calculate a confidence interval for the difference of the proportions.
+
+```{r}
+inference(y = homosex2, 
+          x = as.factor(year),  
+          data = acceptance_rate_compare,
+          type = 'ci',
+          statistic = 'proportion',
+          success = 'Not Wrong At All',
+          method = 'theoretical',
+          conf_level = 0.95)
+```
+
+The confidence interval for the difference of proportions shows that in 2012 the proportion is **between 14.92 and 19.96 percentage points higher**, with a 95% confidence level. This method reinforces the conclusion of the hypothesis test: since the confidence interval doesn’t include 0, we can be confident that there is convincing evidence that the proportion in 2012 is higher.
+
+**For the second part of this research, we would like to know if there is a correlation between the educational level of a person and their opinion towards homosexuality.** In this case, since we want to study if two categorical variables are independent from each other or correlated, we are going to use the **Chi-Square test for independence**.
+
+In this test, our null hypothesis is that there is no difference in proportions for opinion towards homosexuality for people with different educational levels in the US. The alternative hypothesis is that there is a difference in the proportions for different degree groups.
+
+We prepare the data by creating a contingency table with the counts of responses. We have one variable in rows (*degree*) and one in columns (*homosex*).
+
+```{r}
+education_chi2 <- education %>% 
+  group_by(degree, homosex) %>% 
+  summarise(n = n()) %>% 
+  spread(homosex, n)
+
+education_chi2
+```
+
+The conditions for performing a Chi-Square test are:
+
+* **Independence:** Data comes from a random sample, the sample size is less than 10% of the population and data is independent within groups (each case only contributes to one cell in the table).
+
+* **Sample size:** Each particular scenario should have at least 5 cases. Since we have three cases where there are only 3 observations each, this condition is not met. In order to perform a Chi-Square test, we will need to use a simulation-based method.
+
+We can now use R to compute the Chi-Square test on the numeric columns. We specify the simulation with 10,000 repetitions as parameters to the R function **chisq.test()**.
+
+```{r}
+set.seed(123)
+chisq.test(education_chi2[,2:4],
+           simulate.p.value = TRUE,
+           B = 10000)
+```
+
+The p-value of the Chi-Square test is 0.0131. Since it is less than 0.05, **we reject the null hypothesis in favor of the alternative (educational level and opinion towards homosexuality are dependent variables).**
