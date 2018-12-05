@@ -120,14 +120,14 @@ variable         | description
 
 1. Is this an observational study or an experiment?
 <ol>
-<li> Observational study </li>
+<li> X Observational study </li>
 <li> Experiment </li>
 </ol>
 
 2. The original research question posed in the paper is whether beauty leads directly to the differences in course evaluations.  Given the study design, should the question be rephrased? If so, how? 
 <ol>
 <li> No, the question is worded accurately. </li>
-<li> Yes, revise wording to "Is there an association between beauty and course evaluations?" </li>
+<li> X Yes, revise wording to "Is there an association between beauty and course evaluations?" </li>
 <li> Yes, revise wording to "Does beauty score increase the professor's course evaluations?"  </li>
 <li> Yes, revise wording to "Does beauty score decrease the professor's course evaluations?" </li>
 </ol>
@@ -136,24 +136,34 @@ variable         | description
 
 3. Which of the following statements is **false** about the distribution of `score`? 
 <ol>
-<li> The median of the distribution is 4.3. </li>
-<li> 25\% of the students gave their professors a score of over 4.6. </li> 
-<li> 11 of students gave a professor a score below 3. </li> 
-<li> The left skewness of the data suggests that the students are less likely to rate the professors highly. </li>
+<li> T The median of the distribution is 4.3. </li>
+<li> T 25\% of the students gave their professors a score of over 4.6. </li> 
+<li> T 11 of students gave a professor a score below 3. </li> 
+<li> F The left skewness of the data suggests that the students are less likely to rate the professors highly. </li>
 </ol>
 ```{r score-dist}
 # type your code for Question 3 here, and Knit
-
+summary(evals$score)
+evals %>% 
+  filter(score < 3) %>% 
+  summarise(n())
+hist(evals$score)
 ```
 
 <div id="exercise">
 **Exercise:** Excluding `score`, select two other variables and describe their 
 relationship using an appropriate visualization (scatterplot, side-by-side boxplots, 
 or mosaic plot).
+
+Variables chosen:
+**age (age of professor) and bty_avg (average beauty rating of professor)**
+The association between the professor's age and the average beuty rating he/she receives appears to be negative, linear and weak. 
+
 </div>
 ```{r two-vars-eda}
 # type your code for the Exercise here, and Knit
-
+ggplot(evals, aes(x = age, y = bty_avg, color = gender)) +
+  geom_point()
 ```
 
 ## Simple linear regression
@@ -178,7 +188,8 @@ about the initial scatterplot?
 </div>
 ```{r jitter}
 # type your code for the Exercise here, and Knit
-
+ggplot(data = evals, aes(x = bty_avg, y = score)) +
+  geom_jitter()
 ```
 
 Let's see if the apparent trend in the plot is something more than 
@@ -204,15 +215,22 @@ ggplot(data = evals, aes(x = bty_avg, y = score)) +
 <div id="exercise">
 **Exercise:** Print a summary of the linear model, write out the equation, and 
 interpret the slope. 
+
+Equation:
+score = 3.88034 + 0.06664 * bty_avg
+
+For each additional point in the average beauty rating of the professor, we should expect an increase of 0.07 points on the professor score on average.
+
 </div>
 ```{r summary-model}
 # type your code for the Exercise here, and Knit
-
+m_bty <- lm(score ~ bty_avg, data = evals)
+summary(m_bty)
 ```
 
 4. Average beauty score is a statistically significant predictor of evaluation score. 
 <ol> 
-<li> True </li>
+<li> X True </li>
 <li> False </li>
 </ol>
 
@@ -220,12 +238,16 @@ interpret the slope.
 <ol>
 <li> Linear association: The residuals plot shows a random scatter. </li>
 <li> Constant variance of residuals: No fan shape in residuals plot. </li>
-<li> Nearly normal residuals: Residuals are right skewed, but the sample size is large, so this may not be an important violation of conditions. </li>
+<li> X Nearly normal residuals: Residuals are right skewed, but the sample size is large, so this may not be an important violation of conditions. </li>
 <li> Independent observations: Classes sampled randomly, no order effect. </li>
 </ol>
 ```{r diag-score-bty_avg}
 # type your code for the Question 5 here, and Knit
+plot(m_bty$residuals ~ evals$bty_avg)
+hist(m_bty$residuals)
 
+qqnorm(m_bty$residuals)
+qqline(m_bty$residuals)
 ```
 
 ## Multiple linear regression
@@ -268,23 +290,41 @@ summary(m_bty_gen)
 
 6. P-values and parameter estimates should only be trusted if the conditions for the regression are reasonable. Using diagnostic plots, we can conclude that the conditions for this model are reasonable. 
 <ol>
-<li> True </li>
+<li> X True </li>
 <li> False </li>
 </ol>
 </div>
 ```{r diag-mlr-model}
 # type your code for the Exercise here, and Knit
 
+# 1. check if explanatory variables are linearly related to the response variable
+plot(m_bty_gen$residuals ~ evals$bty_avg) 
+
+# 2. check if residuals are nearly normal, centered around 0
+hist(m_bty_gen$residuals) 
+
+qqnorm(m_bty_gen$residuals)
+qqline(m_bty_gen$residuals)
+
+# 3. check if residuals have constant variability
+plot(m_bty_gen$residuals ~ m_bty_gen$fitted)
+
+plot(abs(m_bty_gen$residuals) ~ m_bty_gen$fitted)
+
+# 4. check for independence of residuals (regarding time they were collected, for instance)
+plot(m_bty_gen$residuals)
 ```
 
 <div id="exercise">
 **Exercise:** Print a summary of the multiple linear regression model.  Is `bty_avg` 
 still a significant predictor of `score`?  Has the addition of `gender` to the 
 model changed the parameter estimate for `bty_avg`?
+
+Adding **gender** improved the parameter estimation **bty_avg** both in the magnitude of the slope and also on the significance (p-value) of the parameter.
 </div>
 ```{r summary-mlr-model}
 # type your code for the Exercise here, and Knit
-
+summary(m_bty_gen)
 ```
 
 Note that the estimate for `gender` is now called `gendermale`. You'll see this 
@@ -305,7 +345,7 @@ the intercept and slope form familiar from simple regression.
 
 7. For two professors (one male and one female) who received the same beauty rating, the male professor is predicted to have the higher course evaluation score than the female.
 <ol>
-<li> True </li>
+<li> X True </li>
 <li> False </li>
 </ol>
 
@@ -323,14 +363,15 @@ tenure track, tenured.
 </div>
 ```{r new-mlr-model}
 # type your code for the Exercise here, and Knit
-
+m_bty_rank <- lm(score ~ bty_avg + rank, data = evals)
+summary(m_bty_rank)
 ```
 
 8. Which of the following is the correct order of the three levels of rank if we were to order them from lowest predicted course evaluation score to highest predicted course evaluation score? 
 <ol>
 <li> Teaching, Tenure Track, Tenured </li>
 <li> Tenure track, Tenured </li>
-<li> Tenure Track, Tenured, Teaching </li>
+<li> X Tenure Track, Tenured, Teaching </li>
 <li> Teaching, Tenured, Tenure Track </li>
 </ol>
 
@@ -401,11 +442,12 @@ summary(m_full)
 <div id="exercise">
 **Exercise:** Check your suspicions from the previous exercise. Include the model 
 output in your response.
+The number of professors is the variable with less significance in this model (with a p-value of 0.78).
 </div>
 
 9. Which of the following is the correct intrepetation of the coefficient associated with the ethnicity variable. <br> Non-minority professors are expected on average to score ... 
 <ol>
-<li> 0.12 points lower than minority professors, all else held constant. </li>
+<li> X 0.12 points lower than minority professors, all else held constant. </li>
 <li> 0.12 points higher than minority professors, all else held constant. </li> 
 <li> 0.02 points lower than minority professors, all else held constant. </li>
 <li> 0.02 points higher than minority professors, all else held constant. </li>
@@ -421,7 +463,10 @@ the other explanatory variables?
 </div>
 ```{r p-val-select}
 # type your code for the Exercise here, and Knit
-
+m_full_minus1 <- lm(score ~ rank + ethnicity + gender + language + age + cls_perc_eval 
+             + cls_students + cls_level + cls_credits + bty_avg 
+             + pic_outfit + pic_color, data = evals)
+summary(m_full_minus1)
 ```
 
 Now we try a different model selection method: adjusted $R^2$. Create a new model, 
@@ -449,13 +494,16 @@ the highest improvement in the adjusted $R^2$.
 </div>
 ```{r adj-rsq-select}
 # type your code for the Exercise here, and Knit
-
+m_test <- lm(score ~ rank + ethnicity + gender + language + age + cls_perc_eval 
+             + cls_students + cls_level + cls_credits + bty_avg 
+             + pic_outfit + pic_color, data = evals)
+summary(m_test)$adj.r.squared
 ```
 
 10. Elimination of which variable from the full model yielded the highest adjusted R-squared? 
 <ol>
 <li> `bty_avg` </li>
-<li> `cls_profs` </li> 
+<li> X `cls_profs` </li> 
 <li> `cls_students` </li>
 <li> `rank` </li>
 </ol>
@@ -468,12 +516,14 @@ time until removal of another variable did not increase adjusted $R^2$.
 a sample of professors from the University of Texas at Austin and including all 
 courses that they have taught.  Considering that each row represents a course, 
 could this new information have an impact on any of the conditions of linear regression?
+**Yes, because individual observations can be very influential in linear models.**
 </div>
 
 <div id="exercise">
 **Exercise:** Based on your final model, describe the characteristics of a 
 professor and course at University of Texas at Austin that would be associated 
 with a high evaluation score.
+**rank = teaching, etnicity = minority, gender = male, language of the school where professor received education = english, young age, higher percentage of class completing the evaluation, teaching in a class with a higher number of students, upperclass, teaching class with more credits, beautiful, picture dressing formal, picture with no color.**
 </div>
 
 <div id="exercise">
